@@ -105,6 +105,7 @@ OnceButtonClicks(buttonEventInfo){
               <List listOfTasks = {this.state.taskList}/>
 
 
+
             </div>
           </div>
             )
@@ -147,16 +148,18 @@ deleteItem(e){
 
 //Still working on checkbox tracker
 trackCheckBoxChange(e){
-  console.log('current boxes:',this.state.checkBoxesChecked)
+  
   let currentBoxesChecked = this.state.checkBoxesChecked
-  console.log("is checkbox checked?",e.target.checked)
+
   if (e.target.checked){
-    currentBoxesChecked=+1;
+    currentBoxesChecked=currentBoxesChecked+1;
+    console.log('Added 1:',currentBoxesChecked)
   } else {
-    currentBoxesChecked=-1
+    currentBoxesChecked=currentBoxesChecked-1
+    console.log('Subtracted 1:', currentBoxesChecked)
   }
-  console.log('Current Boxes Checked before setState',currentBoxesChecked)
   this.setState({'checkBoxesChecked':currentBoxesChecked})
+  console.log('current checked after setState:', this.state.checkBoxesChecked)
 
 }
 /* Below it renders a UL and then it goes through each item of array listOfTasks and using map
@@ -185,6 +188,8 @@ id will come out like : "0", "1"... etc, I'll use that later to remove items.
           </div>)
           )
         }
+        <div className='itemBlue'> <li>Current Boxes Checked: {this.state.checkBoxesChecked}</li></div>
+
       </ul>)
     }
 }
