@@ -17,7 +17,7 @@ export default class App extends React.Component { //I did not use "React.Compon
       'davidX': nameProps.david1,
       'alanX': nameProps.alan1
     }
-console.log(this.state.davidX)
+console.log('David\'s last name:',this.state.davidX)
 /* Below I binded my two functions so that later in the document
   I can use "this.FUNCTION_NAME" without it casuing an issue */
     this.addToTaskList=this.addToTaskList.bind(this);
@@ -129,6 +129,7 @@ class List extends React.Component{
     this.state={
       'listTasks': props.listOfTasks,
       'checkBoxesChecked':0,
+      'footerClass': 'footer-hide'
     }
     //Below I bind the functions I made to this component so that when we call the function suach as "this.deleteItem" it works without a problem
     this.deleteItem=this.deleteItem.bind(this);
@@ -146,20 +147,28 @@ deleteItem(e){
   this.setState({'listTasks':this.state.listTasks}) //setting State so it renders with new array and in turn updates list on web app.
 }
 
-//Still working on checkbox tracker
-trackCheckBoxChange(e){
-  
-  let currentBoxesChecked = this.state.checkBoxesChecked
+/*Still working on checkbox tracker below:
+  it doesn't fully work
+*/
 
+trackCheckBoxChange(e){
+
+  let currentBoxesChecked = this.state.checkBoxesChecked
+  // If the value of checkbox is 'true', then +1 to counter, otherwise -1
   if (e.target.checked){
     currentBoxesChecked=currentBoxesChecked+1;
-    console.log('Added 1:',currentBoxesChecked)
   } else {
     currentBoxesChecked=currentBoxesChecked-1
-    console.log('Subtracted 1:', currentBoxesChecked)
   }
-  this.setState({'checkBoxesChecked':currentBoxesChecked})
-  console.log('current checked after setState:', this.state.checkBoxesChecked)
+
+    // If there are more than 0 boxes checked, call a CSS class that shows the footer
+    // Otherwise hide the footer calling a class that has CSS property 'display:none'
+    // Why not use the same setState to also setState the updated checkbox count
+    if (currentBoxesChecked>0){
+      this.setState({'footerClass':'footer', 'checkBoxesChecked':currentBoxesChecked})
+    } else{
+      this.setState({'footerClass':'footer-hide', 'checkBoxesChecked':currentBoxesChecked})
+    }
 
 }
 /* Below it renders a UL and then it goes through each item of array listOfTasks and using map
@@ -175,7 +184,11 @@ id will come out like : "0", "1"... etc, I'll use that later to remove items.
           (
           <div className ='itemBlue' key={eachTask+indx} id={indx}>
             <li>{eachTask}</li>
-            <input className="chbox" type="checkbox" onChange={(eventInfo)=>this.trackCheckBoxChange(eventInfo)}/>
+            <input
+              className="chbox"
+              type="checkbox"
+              onChange={(eventInfo)=>
+                this.trackCheckBoxChange(eventInfo)}/>
 
               {/*Below I add a 'name' property to the button that is the same
               as the id of the above <div> in order to use it, by using the
@@ -188,7 +201,7 @@ id will come out like : "0", "1"... etc, I'll use that later to remove items.
           </div>)
           )
         }
-        <div className='itemBlue'> <li>Current Boxes Checked: {this.state.checkBoxesChecked}</li></div>
+        <div className={this.state.footerClass}> <li>Current Boxes Checked: {this.state.checkBoxesChecked}</li></div>
 
       </ul>)
     }
