@@ -59,13 +59,17 @@ OnceButtonClicks(buttonEventInfo){
   addToTaskList() {
     if (this.state.inputValue!==""){            //Will execute only if inputValue is not empty
       let updatingTaskList = this.state.taskList; // Put current array in a temporary variable for readibilty
-      updatingTaskList.push(this.state.inputValue) // Here the new task gets pushed into array
+      let newTaskObject = {                       // Will put new task in an Object to pass it later to <List/> and help with counting functions
+        textValue: this.state.inputValue,
+        checkBoxValue: false
+      }
+      updatingTaskList.push(newTaskObject) // Here the new task gets pushed into array
       this.setState({
         'taskList': updatingTaskList,
         'inputValue':""
-      }) //Here I setState w/ new Array and empty the inputValue
+      }) //Above I setState w/ new Array and empty the inputValue
     } else console.log('Input Blank')           // If the person has not put anything and had pressed enter,
-                                                //nothing will happen
+                                                // nothing will happen, just logged it.
   }
 
 /* Below is the actual 'website' that renders from this component 'App'*/
@@ -119,19 +123,27 @@ I go into the prop object and grab the element with the key "listOfTasks" which 
 above in the render() of App where I assigned it as such: listOfTasks=this.state.taskList (line 94)
 */
 class List extends React.Component{
-  /* props = {
+  /* Here's an example of the props Object that came from when <List/> is 'called' towards the bottom of App.js
+  props = {
   listOfTasks: (previous taskList)
   }
+  */
 
+  /*tasksListArrayOfObjects reference:
+    tasksListArrayOfObjects = {
+    textValue: this.state.inputValue,
+    checkBoxValue: false
+  }
   */
   constructor(props){
     super(props);
     this.state={
-      'listTasks': props.listOfTasks,
+      'tasksListArrayOfObjects': props.listOfTasks,
       'checkBoxesChecked':0,
       'footerClass': 'footer-hide'
     }
-    //Below I bind the functions I made to this component so that when we call the function suach as "this.deleteItem" it works without a problem
+    //Below I bind the functions I made to this component so that when we call the function
+    //such as "this.deleteItem" it works without a problem
     this.deleteItem=this.deleteItem.bind(this);
     this.trackCheckBoxChange=this.trackCheckBoxChange.bind(this);
 
@@ -141,10 +153,10 @@ deleteItem(e){
   console.log('deleteItem() called') //Just loggint to make sure it was being called
 
   let targetTask = e.target.name     // bringing the name= property of the button into variable targetTask
-  this.state.listTasks.splice(targetTask,1)
+  this.state.tasksListArrayOfObjects.splice(targetTask,1)
   //Above: 'name' of button matches 'id' of <div><li> Task item, so I use that to splice it off array taskList
 
-  this.setState({'listTasks':this.state.listTasks}) //setting State so it renders with new array and in turn updates list on web app.
+  this.setState({'tasksListArrayOfObjects':this.state.tasksListArrayOfObjects}) //setting State so it renders with new array and in turn updates list on web app.
 }
 
 /*Still working on checkbox tracker below:
@@ -152,38 +164,42 @@ deleteItem(e){
 */
 
 trackCheckBoxChange(e){
-
-  let currentBoxesChecked = this.state.checkBoxesChecked
+  //let currentBoxesChecked
+    this.state.tasksListArrayOfObjects.forEach((taskObject,index,arr)=>console.log(taskObject.textValue))
   // If the value of checkbox is 'true', then +1 to counter, otherwise -1
+  /*
   if (e.target.checked){
     currentBoxesChecked=currentBoxesChecked+1;
   } else {
     currentBoxesChecked=currentBoxesChecked-1
   }
 
-    // If there are more than 0 boxes checked, call a CSS class that shows the footer
-    // Otherwise hide the footer calling a class that has CSS property 'display:none'
+    // If there are less than 1 boxes checked, call a CSS class that hides the footer
+    // Otherwise call the regular CSS class for the footer
     // Why not use the same setState to also setState the updated checkbox count
-    if (currentBoxesChecked>0){
-      this.setState({'footerClass':'footer', 'checkBoxesChecked':currentBoxesChecked})
-    } else{
+    if (currentBoxesChecked<1){
       this.setState({'footerClass':'footer-hide', 'checkBoxesChecked':currentBoxesChecked})
+    } else{
+      this.setState({'footerClass':'footer', 'checkBoxesChecked':currentBoxesChecked})
     }
-
+    */
 }
+
+
 /* Below it renders a UL and then it goes through each item of array listOfTasks and using map
 it wraps it in a div, and li, and adds a key and id.
 
-key is just a random mix of the actual task + index, this is added cause React wants it to have it
-id will come out like : "0", "1"... etc, I'll use that later to remove items.
-
+key is just a random mix of the actual (task + index), this is added cause React wants each
+iterated item to have it''s own key.
+id''s will come out like : '0', '1'... etc, I''ll use that later to remove items.
 */
+
     render(){return (
       <ul>
-        {this.state.listTasks.map((eachTask,indx,arr)=>
+        {this.state.tasksListArrayOfObjects.map((taskObject,indx,arr)=>
           (
-          <div className ='itemBlue' key={eachTask+indx} id={indx}>
-            <li>{eachTask}</li>
+          <div className ='itemBlue' key={taskObject.textValue+indx} id={indx}>
+            <li>{taskObject.textValue}</li>
             <input
               className="chbox"
               type="checkbox"
