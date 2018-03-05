@@ -164,8 +164,9 @@ deleteItem(e){
 */
 
 trackCheckBoxChange(e){
-  //let currentBoxesChecked
-    this.state.tasksListArrayOfObjects.forEach((taskObject,index,arr)=>console.log(taskObject.textValue))
+    let currentBoxesChecked
+    let currentTaskArray = this.state.tasksListArrayOfObjects
+    //currentTaskArray.forEach((taskObject,index,arr)=>console.log(taskObject.textValue))
   // If the value of checkbox is 'true', then +1 to counter, otherwise -1
   /*
   if (e.target.checked){
