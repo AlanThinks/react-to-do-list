@@ -141,7 +141,9 @@ class List extends React.Component {
       tasksList: props.listOfTasks,
       checkBoxesChecked: 0,
       footerClass: "footer-hide",
-      activeTaskIndex: 0
+      activeTaskIndex: 0,
+      tasksCreated: 0,
+      tasksDeleted: 0
     };
     //Below I bind the functions I made to this component so that when we call the function
     //such as "this.deleteItem" it works without a problem
@@ -152,72 +154,82 @@ class List extends React.Component {
   deleteItem(e) {
     console.log("deleteItem() called"); //Just loggint to make sure it was being called
     let currentBoxesChecked = this.state.checkBoxesChecked;
-    let currentTaskObject = this.state.tasksList[e.target.name]
+    let currentTaskObject = this.state.tasksList[e.target.name];
     let targetTask = e.target.name; // bringing the name= property of the button into variable targetTask
     this.state.tasksList.splice(targetTask, 1);
     //Above: 'name' of button matches 'id' of <div><li> Task item, so I use that to splice it off array taskList
 
-    
-      if (currentTaskObject.checkBoxValue){
-        currentBoxesChecked-=1;
-      }
-    
+    if (currentTaskObject.checkBoxValue) {
+      currentBoxesChecked -= 1;
+    }
+
     this.setState({
       tasksList: this.state.tasksList,
-      checkBoxesChecked:currentBoxesChecked})
-      
-      if (currentBoxesChecked < 1) {
-        this.setState({
-          checkBoxesChecked: currentBoxesChecked,
-          footerClass: "footer-hide"
-        });
-      } else {
-        this.setState({
-          checkBoxesChecked: currentBoxesChecked,
-          footerClass: "footer"
-        });
-      }
+      checkBoxesChecked: currentBoxesChecked,
+      tasksDeleted: this.state.tasksDeleted + 1
+    });
+
+    if (currentBoxesChecked < 1) {
+      this.setState({
+        checkBoxesChecked: currentBoxesChecked,
+        footerClass: "footer-hide"
+      });
+    } else {
+      this.setState({
+        checkBoxesChecked: currentBoxesChecked,
+        footerClass: "footer"
+      });
+    }
   }
 
   /*Still working on checkbox tracker below:
   it doesn't fully work
 */
 
-
-
   trackCheckBoxChange(e) {
     console.log("trackCheckBoxChange called");
     let currentCheckBoxValue = e.target.checked;
-    let currentTaskList = this.state.tasksList
-    let currentTextValue = this.state.tasksList[e.target.name].textValue
-    let updatingTaskObject = {textValue: currentTextValue, checkBoxValue:currentCheckBoxValue}
-    currentTaskList.splice(e.target.name,1,updatingTaskObject)
-    this.setState({tasksList:currentTaskList},()=>{
-      let currentBoxesChecked=0
+    let currentTaskList = this.state.tasksList;
+    let currentTextValue = this.state.tasksList[e.target.name].textValue;
+    let updatingTaskObject = {
+      textValue: currentTextValue,
+      checkBoxValue: currentCheckBoxValue
+    };
+    currentTaskList.splice(e.target.name, 1, updatingTaskObject);
+    this.setState({ tasksList: currentTaskList }, () => {
+      let currentBoxesChecked = 0;
 
-    currentTaskList.forEach(taskObject => {
-      if (taskObject.checkBoxValue===true){
-        currentBoxesChecked+=1;
+      currentTaskList.forEach(taskObject => {
+        if (taskObject.checkBoxValue === true) {
+          currentBoxesChecked += 1;
+        }
+      });
+
+      // If there are less than 1 boxes checked, call a CSS class that hides the footer
+      // Otherwise call the regular CSS class for the footer
+      // Why not use the same setState to also setState the updated checkbox count
+      if (
+        currentBoxesChecked < 1 &&
+        this.state.tasksCreated < 1 &&
+        this.state.tasksDeleted < 1
+      ) {
+        this.setState(
+          {
+            checkBoxesChecked: currentBoxesChecked,
+            footerClass: "footer-hide"
+          },
+          () => console.log("set.State of checkBoxesChecked done")
+        );
+      } else {
+        this.setState(
+          {
+            checkBoxesChecked: currentBoxesChecked,
+            footerClass: "footer"
+          },
+          () => console.log("set.State of checkBoxesChecked done")
+        );
       }
     });
-
-    // If there are less than 1 boxes checked, call a CSS class that hides the footer
-    // Otherwise call the regular CSS class for the footer
-    // Why not use the same setState to also setState the updated checkbox count
-    if (currentBoxesChecked < 1) {
-      this.setState({
-        checkBoxesChecked: currentBoxesChecked,
-        footerClass: "footer-hide"
-      },()=>console.log('set.State of checkBoxesChecked done'));
-    } else {
-      this.setState({
-        checkBoxesChecked: currentBoxesChecked,
-        footerClass: "footer"
-      },()=>console.log('set.State of checkBoxesChecked done'));
-    }
-    })
-
-    
   }
 
   /* Below it renders a UL and then it goes through each item of array listOfTasks and using map
@@ -229,19 +241,30 @@ id''s will come out like : '0', '1'... etc, I''ll use that later to remove items
 */
 
   render() {
+    
     return (
       <ul>
-        {console.log(this.state)}
-        {this.state.tasksList.map((taskObject, indx, arr) => (
-          <div className="itemBlue" key={taskObject.textValue + indx} id={indx}>
-            <li>{taskObject.textValue}</li>
-            <input
+        {
+          this.state.tasksList.map((taskObject, indx, arr) => {
+          let input = (<input
+            name={indx}
+            className="chbox"
+            type="checkbox"
+            onChange={this.trackCheckBoxChange}
+          />);
+          if(taskObject.checkBoxValue === true){
+            input = (<input
               name={indx}
               className="chbox"
               type="checkbox"
               onChange={this.trackCheckBoxChange}
-              //checked={this.state.tasksList[indx].checkBoxValue}
-            />
+              checked
+            />);
+          }
+          return (
+          <div className="itemBlue" key={taskObject.textValue + indx} id={indx}>
+            <li>{taskObject.textValue}</li>
+            {input}
 
             {/*Below I add a 'name' property to the button that is the same
               as the id of the above <div> in order to use it, by using the
@@ -249,17 +272,21 @@ id''s will come out like : '0', '1'... etc, I''ll use that later to remove items
             <button
               name={indx}
               className="btn-delete"
-              onChange={e=>this.updateTaskIndex(e)}
+              onChange={e => this.updateTaskIndex(e)}
               onClick={this.deleteItem}
-              checked={this.state.tasksList[indx].checkBoxValue }
+              checked={this.state.tasksList[indx].checkBoxValue}
             >
               Delete
             </button>
           </div>
-        ))}
-        <div className={this.state.footerClass}>
+          );
+        })
+        }
+        <div className='new-footer'>
           {" "}
-          <li>Current Boxes Checked: {this.state.checkBoxesChecked}</li>
+          <li>Current Tasks:{this.state.tasksList.length}</li>
+          <li>Current Tasks Completed: {this.state.checkBoxesChecked}</li>
+          <li>Total Tasks Deleted: {this.state.tasksDeleted}</li>
         </div>
       </ul>
     );
